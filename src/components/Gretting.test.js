@@ -8,6 +8,7 @@
 // Import Component that we do wanna test
 
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import Greeting from './Greeting';
 
 // test('renders Hello World as a text', () => {
@@ -46,7 +47,7 @@ Now with our first custom tests written, before we write more tests, let's talk 
 */
 
 describe('Greeting Component', () => {
-  test('renders Hello World as a text', () => {
+  test('renders "Hello World" as a text', () => {
     // Arrange
     // Render your component
     render(<Greeting />);
@@ -63,6 +64,66 @@ describe('Greeting Component', () => {
     // Globally available function
     //   expect(helloWorldElement).not.toBeInTheDocument();
 
+    //   Assert
     expect(helloWorldElement).toBeInTheDocument();
+  });
+
+  test('renders "good to see you" if the button was NOT clicked', () => {
+    //   Arrange
+    render(<Greeting />);
+
+    // Then we want to act. We want to perform the main action that's interesting to us. And here that's basically nothing.
+
+    // Act
+    // ... nothing
+
+    //   Assert
+    const paragraphElement = screen.getByText('good to see you', {
+      exact: false,
+    });
+
+    // Our expectation is that this element exists in the DOM so that we'll able to find an element with that test.
+    expect(paragraphElement).toBeInTheDocument();
+  });
+
+  // Test when the button is clicked and see our expectation
+  test('renders "Changed" if the button was clicked', () => {
+    // Arrange
+    render(<Greeting />);
+
+    // Act
+    // We wanna click button
+    // Now for this, we can import another feature from another package, which also was installed out of the box, from the testing library user event package, to be precise.
+
+    // From there, I want to import userEvent just like this. So from @testing-library user event. User event is an object that helps us trigger user events in this virtual screen. We can simply use user event, and then there, we got all these typical events which we can perform like clicking, double clicking, hovering, typing into inputs.
+    //   Here we of course need a click. And click then needs one argument at least. It needs the element on which you want to simulate a click. And in my case that's, of course, this button here. We can select this button again by text but we can also select it differently and to mix things up, I'll show you that alternative.We can, again, use the screen here and get this element by role. We can get it by role, and button is a role elements can have on the screen. And since I only have one button here that will give me access to this one button I have here.
+
+    const buttonElement = screen.getByRole('button');
+    //   You could select button by text
+    userEvent.click(buttonElement);
+
+    // Assert
+    const paragraphElement = screen.getByText('Changed!');
+    expect(paragraphElement).toBeInTheDocument();
+  });
+  // First paragraph is gone if we click the button
+  test('does not render "good to see you" if the button was clicked', () => {
+    // Arrange
+    render(<Greeting />);
+
+    // Act
+    const buttonElement = screen.getByRole('button');
+    userEvent.click(buttonElement);
+
+    // Assert
+    //   Note: Now getByText() will fail if an element is not found and here is my expectation is actually that it's not found. So here we should write not to be in the document. But again it will throw an error if it's not found, this test could never pass if the element is not found even though that is what we want. So that's then a reason for using query by text
+    // It returns null if the element is not found
+    const paragraphElement = screen.queryByText('good to see you', {
+      exact: false,
+    });
+
+    // expect(paragraphElement).not.toBeInTheDocument();
+    // expect(paragraphElement).not.toBeInTheDocument();
+    expect(paragraphElement).toBeNull();
   });
 });
